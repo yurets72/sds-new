@@ -46,7 +46,7 @@
       </dl>
     </div>
     <figure class="hero-fig">
-      <img class="photo" src="assets/img/S284_hero.jpg" alt="Работающий завод: оранжевый самосвал выгружает щебень в приёмный бункер агрегата">
+      <img class="photo" src="assets/img/S284_hero.jpg" width="1280" height="960" alt="Работающий завод: оранжевый самосвал выгружает щебень в приёмный бункер агрегата">
       <figcaption>Приёмный бункер работающей линии принимает щебень. Фото: архив СДС.</figcaption>
     </figure>
   </div>
@@ -67,13 +67,13 @@
         </dl>
       </div>
       <figure class="dir-fig">
-        <img class="photo" src="assets/img/S328_dsk.jpg" alt="Конвейерная линия перевозит дроблёный камень вдоль комплекса">
+        <img class="photo" src="assets/img/S328_dsk.jpg" width="960" height="1280" alt="Конвейерная линия перевозит дроблёный камень вдоль комплекса">
         <figcaption>Конвейерная линия на объекте: дроблёный камень идёт в штабель.</figcaption>
       </figure>
     </div>
     <div class="dir-two">
       <figure class="dir-fig">
-        <img class="photo" src="assets/img/S179_abz.jpg" alt="Высокая башня асфальтосмесительного завода с лестницами и площадками обслуживания">
+        <img class="photo" src="assets/img/S179_abz.jpg" width="1008" height="1792" alt="Высокая башня асфальтосмесительного завода с лестницами и площадками обслуживания">
         <figcaption>Башня смесителя: сушка, дозирование, автоматика.</figcaption>
       </figure>
       <div>
@@ -94,7 +94,7 @@
   </div>
 </section>
 
-<!-- ПОДБОР: живая вещь -->
+<!-- ПОДБОР: живая вещь + 3D-сцена -->
 <section id="selector" class="section section-tone" aria-labelledby="h-sel">
   <div class="wrap">
     <h2 id="h-sel">Подойдёт ли под задачу?</h2>
@@ -122,6 +122,11 @@
         <label><input type="radio" name="frac" value="40-70"> 40–70</label>
       </fieldset>
     </form>
+    <figure class="schema3d-fig">
+      <iframe class="schema3d" src="schema3d.html" loading="lazy"
+        title="Интерактивная 3D-схема линии ДСК: от приёмного бункера до грохота"></iframe>
+      <figcaption>Крутите схему, тяните ползунок — линия разбирается на узлы. Схема иллюстративная: точный состав считает инженер.</figcaption>
+    </figure>
     <div class="chain-in">
       <div class="chain" id="chain" aria-live="polite">
         <ol>
@@ -133,21 +138,17 @@
         <p class="note">Подбор на странице предварительный: точный состав, компоновку и стоимость считает инженер в КП.</p>
         <a class="btn" id="quote" href="mailto:info@sdors.ru?subject=%D0%97%D0%B0%D1%8F%D0%B2%D0%BA%D0%B0%20%D0%BD%D0%B0%20%D0%9A%D0%9F">Получить этот расчёт в КП</a>
       </div>
-      <figure class="artifact-fig">
-        <img class="photo" src="assets/img/P054_schema.jpg" alt="Схема дробильно-сортировочной цепочки: питатель, дробилки, грохот, конвейеры">
-        <figcaption>Схема цепочки: от приёмного бункера до штабелей фракций.</figcaption>
-      </figure>
+      <table class="spec-table fallback">
+        <caption>Типовые цепочки: ориентир без подборщика</caption>
+        <thead><tr><th>Задача</th><th>Цепочка</th></tr></thead>
+        <tbody>
+          <tr><td>Гранит, 100–150 т/ч</td><td>PE-600×900 → DP-100 → 3YZK1548</td></tr>
+          <tr><td>Гранит, 250–450 т/ч</td><td>PE-750×1060 → DP-200 → 3YZK1860</td></tr>
+          <tr><td>Известняк, 100–250 т/ч</td><td>PE-600×900 → 3YZK1860</td></tr>
+          <tr><td>Фрезерованный асфальт</td><td>PE-600×900 → 3YZK1860, возврат в АБЗ</td></tr>
+        </tbody>
+      </table>
     </div>
-    <table class="spec-table fallback">
-      <caption>Типовые цепочки: ориентир без подборщика</caption>
-      <thead><tr><th>Задача</th><th>Цепочка</th></tr></thead>
-      <tbody>
-        <tr><td>Гранит, 100–150 т/ч</td><td>PE-600×900 → DP-100 → 3YZK1548</td></tr>
-        <tr><td>Гранит, 250–450 т/ч</td><td>PE-750×1060 → DP-200 → 3YZK1860</td></tr>
-        <tr><td>Известняк, 100–250 т/ч</td><td>PE-600×900 → 3YZK1860</td></tr>
-        <tr><td>Фрезерованный асфальт</td><td>PE-600×900 → 3YZK1860, возврат в АБЗ</td></tr>
-      </tbody>
-    </table>
   </div>
 </section>
 
@@ -174,11 +175,11 @@
     </div>
     <div class="supply-figs">
       <figure>
-        <img class="photo nameplate-photo" src="assets/img/S542_nameplate.jpg" alt="Серийная табличка с характеристиками на корпусе поставленного оборудования">
+        <img class="photo nameplate-photo" src="assets/img/S542_nameplate.jpg" width="551" height="353" alt="Серийная табличка с характеристиками на корпусе поставленного оборудования">
         <figcaption>Серийная табличка на отгруженной линии.</figcaption>
       </figure>
       <figure class="artifact-fig">
-        <img class="photo" src="assets/img/P170_isometry.jpg" alt="Изометрическая схема компоновки линии: узлы и связи в одном чертеже">
+        <img class="photo" src="assets/img/P170_isometry.jpg" width="1024" height="686" alt="Изометрическая схема компоновки линии: узлы и связи в одном чертеже">
         <figcaption>Изометрия линии: состав поставки в одном чертеже.</figcaption>
       </figure>
     </div>
@@ -202,7 +203,7 @@
     <div>
       <p class="statement launch-aside">Инженер СДС говорит с заводом на китайском, английском и корейском и решает вопросы на монтаже сам — без переводчика и переписки через посредника.</p>
       <figure class="launch-fig">
-        <img class="photo" src="assets/img/S374_launch.jpg" alt="Оператор в каске работает за пультом управления заводом">
+        <img class="photo" src="assets/img/S374_launch.jpg" width="960" height="1280" alt="Оператор в каске работает за пультом управления заводом">
         <figcaption>Операторский пульт: вывод линии на производительность.</figcaption>
       </figure>
     </div>
@@ -223,11 +224,11 @@
     </div>
     <div class="service-figs">
       <figure class="service-fig">
-        <img class="photo" src="assets/img/S326_service.jpg" alt="Инженер обслуживает панель управления промышленной установки, коллега наблюдает рядом">
+        <img class="photo" src="assets/img/S326_service.jpg" width="960" height="819" alt="Инженер обслуживает панель управления промышленной установки, коллега наблюдает рядом">
         <figcaption>Инженер СДС у панели управления на объекте заказчика.</figcaption>
       </figure>
       <figure class="cert-fig">
-        <img class="photo" src="assets/img/S028_certificate.jpg" alt="Калибровочный сертификат, лежащий рядом с распакованным датчиком">
+        <img class="photo" src="assets/img/S028_certificate.jpg" width="1024" height="1024" alt="Калибровочный сертификат, лежащий рядом с распакованным датчиком">
         <figcaption>С документами приезжает даже датчик: калибровочный сертификат из комплекта.</figcaption>
       </figure>
     </div>
@@ -282,7 +283,7 @@
         <li><strong>2022</strong> Шнековые транспортёры для LB1500, металлодетекторы 650/800 мм.</li>
       </ol>
       <figure class="history-fig">
-        <img class="photo" src="assets/img/S208_history.jpg" alt="Зимний монтаж: автокран поднимает синий силос над заснеженной площадкой">
+        <img class="photo" src="assets/img/S208_history.jpg" width="960" height="998" alt="Зимний монтаж: автокран поднимает синий силос над заснеженной площадкой">
         <figcaption>Зимний монтаж: кран ставит силос в проектное положение.</figcaption>
       </figure>
     </div>
