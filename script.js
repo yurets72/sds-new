@@ -1,5 +1,5 @@
-// Живая вещь: предварительный подбор цепочки ДСК. Без JS страница читается полностью,
-// ниже селектора лежит статичная таблица типовых цепочек.
+/* Живая вещь: предварительный подбор цепочки ДСК. Без JS страница читается полностью,
+   ниже селектора лежит статичная таблица типовых цепочек. */
 (function () {
   var form = document.getElementById("selector-form");
   var chain = document.getElementById("chain");
@@ -63,11 +63,19 @@
     }).join("\n") + "\n\nПлощадка и сроки:\n";
     quote.href = "mailto:info@sdors.ru?subject=" + encodeURIComponent(subject) +
                  "&body=" + encodeURIComponent(body);
+
+    var frame = document.querySelector(".schema3d");
+    if (frame && frame.contentWindow) {
+      frame.contentWindow.postMessage({
+        type: "sds-config", rock: rock.label, tph: tph, frac: frac.label
+      }, "*");
+    }
   }
 
   form.addEventListener("change", build);
   build();
 })();
+
 /* Слой движения: вход секций. Без JS и при reduced-motion ничего не скрывается. */
 (function () {
   var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -79,7 +87,7 @@
     });
   }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
   document.querySelectorAll(".hero, .section, .footer").forEach(function (block) {
-    var parts = block.querySelectorAll("h1, h2, .support, .statement, figure, .plate-passport, .selector, .chain-in, .spec-table, .works, .fears, .timeline, .faq-row, .contacts, .dir-one, .dir-two, .dir-three");
+    var parts = block.querySelectorAll("h1, h2, .support, .statement, figure, .plate-passport, .selector, .schema3d-fig, .chain-in, .spec-table, .works, .fears, .timeline, .faq-row, .contacts, .dir-one, .dir-two, .dir-three");
     parts.forEach(function (el, i) {
       el.classList.add("reveal");
       el.style.transitionDelay = Math.min(i * 70, 420) + "ms";
