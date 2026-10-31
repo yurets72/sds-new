@@ -68,3 +68,22 @@
   form.addEventListener("change", build);
   build();
 })();
+/* Слой движения: вход секций. Без JS и при reduced-motion ничего не скрывается. */
+(function () {
+  var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduce || !("IntersectionObserver" in window)) return;
+  document.documentElement.classList.add("js");
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) { entry.target.classList.add("in"); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+  document.querySelectorAll(".hero, .section, .footer").forEach(function (block) {
+    var parts = block.querySelectorAll("h1, h2, .support, .statement, figure, .plate-passport, .selector, .chain-in, .spec-table, .works, .fears, .timeline, .faq-row, .contacts, .dir-one, .dir-two, .dir-three");
+    parts.forEach(function (el, i) {
+      el.classList.add("reveal");
+      el.style.transitionDelay = Math.min(i * 70, 420) + "ms";
+      io.observe(el);
+    });
+  });
+})();
