@@ -1,0 +1,70 @@
+// Живая вещь: предварительный подбор цепочки ДСК. Без JS страница читается полностью,
+// ниже селектора лежит статичная таблица типовых цепочек.
+(function () {
+  var form = document.getElementById("selector-form");
+  var chain = document.getElementById("chain");
+  var quote = document.getElementById("quote");
+  if (!form || !chain || !quote) return;
+
+  var ROCKS = {
+    granit:     { label: "гранит", kind: "hard" },
+    bazalt:     { label: "базальт", kind: "hard" },
+    izvestnyak: { label: "известняк", kind: "soft" },
+    rap:        { label: "фрезерованный асфальт", kind: "rap" }
+  };
+  var SIZES = {
+    "100": { jaw: "PE-500×750",  cone: "DP-100",  screen: "3YZK1548" },
+    "150": { jaw: "PE-600×900",  cone: "DP-100",  screen: "3YZK1860" },
+    "250": { jaw: "PE-750×1060", cone: "DP-200",  screen: "3YZK1860" },
+    "450": { jaw: "PE-900×1200", cone: "XHP-300", screen: "4YZK2160" }
+  };
+  var FRACS = {
+    "0-5":   { label: "0–5",   decks: "3 деки" },
+    "5-20":  { label: "5–20",  decks: "2 деки" },
+    "20-40": { label: "20–40", decks: "2 деки" },
+    "40-70": { label: "40–70", decks: "2 деки" }
+  };
+
+  function pick(name) {
+    var input = form.querySelector('input[name="' + name + '"]:checked');
+    return input ? input.value : null;
+  }
+
+  function build() {
+    var rock = ROCKS[pick("rock")] || ROCKS.granit;
+    var tph = pick("tph") || "250";
+    var frac = FRACS[pick("frac")] || FRACS["5-20"];
+    var size = SIZES[tph];
+    var steps = [];
+
+    if (rock.kind === "rap") {
+      steps.push(["Первичное дробление", "Щековая дробилка PE-600×900 (RAP)"]);
+      steps.push(["Сортировка", "Грохот 3YZK1860, " + frac.decks]);
+      steps.push(["Продукт", "Фракция " + frac.label + " мм, возврат в АБЗ"]);
+    } else if (rock.kind === "soft") {
+      steps.push(["Первичное дробление", "Щековая дробилка " + size.jaw]);
+      steps.push(["Сортировка", "Грохот " + size.screen + ", " + frac.decks]);
+      steps.push(["Продукт", "Фракция " + frac.label + " мм"]);
+    } else {
+      steps.push(["Первичное дробление", "Щековая дробилка " + size.jaw]);
+      steps.push(["Вторичное дробление", "Конусная гидравлическая " + size.cone]);
+      steps.push(["Сортировка", "Грохот " + size.screen + ", " + frac.decks]);
+      steps.push(["Продукт", "Фракция " + frac.label + " мм"]);
+    }
+
+    var ol = chain.querySelector("ol");
+    ol.innerHTML = steps.map(function (s) {
+      return "<li><span>" + s[0] + "</span><strong>" + s[1] + "</strong></li>";
+    }).join("");
+
+    var subject = "Заявка на КП: " + rock.label + ", " + tph + " т/ч, фракция " + frac.label;
+    var body = "Подбор на сайте:\n" + steps.map(function (s) {
+      return s[0] + ": " + s[1];
+    }).join("\n") + "\n\nПлощадка и сроки:\n";
+    quote.href = "mailto:info@sdors.ru?subject=" + encodeURIComponent(subject) +
+                 "&body=" + encodeURIComponent(body);
+  }
+
+  form.addEventListener("change", build);
+  build();
+})();
