@@ -293,3 +293,8 @@ figure { margin: 0; }
   .dir-fig .photo, .launch-fig .photo, .service-fig .photo, .history-fig .photo { aspect-ratio: 4 / 3; }
   .chain-in, .history-in { grid-template-columns: 1fr; }
 }
+/* ПРАВКИ 2: мобильная колонка АБЗ + схема в естественном размере */
+.artifact-fig .photo { aspect-ratio: auto; height: auto; background: #FFFFFF; }
+@media (max-width: 900px) {
+  #directions .dir-two { grid-template-columns: 1fr; }
+}
