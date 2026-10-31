@@ -263,6 +263,7 @@ figcaption { font-size: var(--fs-small); color: var(--ink-2); margin-top: 12px; 
   #directions .dir-one, #directions .dir-two, .dir-three { grid-template-columns: 1fr; }
   .plate-passport { grid-template-columns: repeat(2, 1fr); }
   .fears div, .faq-row, .timeline { grid-template-columns: 1fr; }
-  .nav nav { order: 3; width: 100%; overflow-x: auto; gap: 18px; padding-bottom: 4px; }
+  .nav nav { order: 3; width: 100%; flex-wrap: wrap; gap: 10px 18px; }
+  .nav-in .btn-small { margin-left: auto; }
   .hero-fig { order: 2; }
 }
