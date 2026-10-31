@@ -267,3 +267,29 @@ figcaption { font-size: var(--fs-small); color: var(--ink-2); margin-top: 12px; 
   .nav-in .btn-small { margin-left: auto; }
   .hero-fig { order: 2; }
 }
+/* ФОТО: архив СДС — добавлено после кастинга */
+figure { margin: 0; }
+.photo { display: block; width: 100%; object-fit: cover; object-position: 50% 45%; }
+.hero-fig .photo { aspect-ratio: 1 / 1; }
+.dir-fig .photo { aspect-ratio: 3 / 4; }
+.launch-fig .photo { aspect-ratio: 3 / 4; }
+.service-fig .photo { aspect-ratio: 3 / 4; }
+.history-fig .photo { aspect-ratio: 4 / 5; }
+.nameplate-photo { aspect-ratio: 16 / 9; }
+.artifact-fig .photo, .cert-fig .photo {
+  object-fit: contain; object-position: center;
+  background: #F7F6F2; padding: 12px;
+}
+.artifact-fig .photo { aspect-ratio: 4 / 3; }
+.cert-fig .photo { aspect-ratio: 1 / 1; }
+#directions .dir-two { grid-template-columns: 0.8fr 1.2fr; }
+#directions .dir-one .specs, #directions .dir-two .specs { margin-top: 24px; }
+.chain-in { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: clamp(24px, 3vw, 56px); align-items: start; }
+.supply-figs, .service-figs { display: grid; gap: 24px; }
+.launch-aside { margin-bottom: 24px; }
+.history-in { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: clamp(24px, 3vw, 56px); align-items: start; }
+@media (max-width: 900px) {
+  .hero-fig .photo { aspect-ratio: 16 / 10; }
+  .dir-fig .photo, .launch-fig .photo, .service-fig .photo, .history-fig .photo { aspect-ratio: 4 / 3; }
+  .chain-in, .history-in { grid-template-columns: 1fr; }
+}
