@@ -6,273 +6,296 @@
 <title>ДСК — интерактивная 3D-схема линии</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
   body {
     font-family: "Golos Text", "Segoe UI", sans-serif;
     background: #1E1D1A;
     color: #ECEAE4;
     overflow: hidden;
   }
-  .scene { position: relative; }
-  .scene canvas { display: block; width: 100%; aspect-ratio: 21 / 9; background: #1E1D1A; }
-  .controls {
-    padding: 16px 20px;
-    background: #ECEAE4;
-    border-top: 1px solid #CFCABD;
+  .stage { position: relative; width: 100%; height: 100%; }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+  .fallback-img {
+    display: none; width: 100%; height: 100%;
+    object-fit: contain; background: #FFFFFF; padding: 24px;
   }
-  .slider-row {
+  .no-webgl canvas { display: none; }
+  .no-webgl .fallback-img { display: block; }
+  .no-webgl .slider { display: none; }
+
+  .slider {
+    position: absolute; left: 16px; right: 16px; bottom: 16px;
     display: flex; align-items: center; gap: 12px;
     font-family: "Oswald", "Arial Narrow", sans-serif;
-    font-size: 14px; letter-spacing: 0.04em; text-transform: uppercase;
-    color: #191919;
-    margin-bottom: 12px;
+    font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #ECEAE4;
+    pointer-events: none;
   }
-  .slider-row input[type=range] {
-    flex: 1; accent-color: #F2B705;
-    height: 6px; cursor: pointer;
+  .slider span { opacity: 0.7; }
+  .slider input[type=range] {
+    flex: 1; height: 3px; pointer-events: auto; cursor: pointer;
+    accent-color: #F2B705; background: rgba(236,234,228,0.3);
+    -webkit-appearance: none; appearance: none;
   }
-  .btn-row {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+  .slider input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #F2B705; border: 0; cursor: pointer;
   }
-  .btn-row button {
-    background: #ECEAE4; color: #191919;
-    border: 1px solid #191919; padding: 10px 8px;
-    font-family: "Golos Text", sans-serif; font-size: 14px; font-weight: 500;
-    cursor: pointer; transition: background-color .15s ease;
+  .slider input[type=range]::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #F2B705; border: 0; cursor: pointer;
   }
-  .btn-row button:hover { background: #D9D5CA; }
-  .btn-row button.active { background: #F2B705; border-color: #F2B705; }
-  .btn-row button:active { transform: translateY(1px); }
+
+  .tooltip {
+    position: absolute;
+    background: #191919; color: #ECEAE4;
+    padding: 12px 14px; max-width: 240px;
+    font-size: 14px; line-height: 1.4;
+    pointer-events: auto;
+    opacity: 0; transform: translateY(6px);
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .tooltip.visible { opacity: 1; transform: translateY(0); }
+  .tooltip h4 {
+    font-family: "Oswald", sans-serif; font-weight: 600;
+    font-size: 14px; color: #F2B705; margin-bottom: 4px;
+    text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .tooltip .close {
+    position: absolute; top: 6px; right: 8px;
+    background: none; border: 0; color: #ECEAE4;
+    font-size: 18px; cursor: pointer; line-height: 1;
+  }
+
   @media (max-width: 600px) {
-    .btn-row { grid-template-columns: repeat(2, 1fr); }
-    .scene canvas { aspect-ratio: 4 / 3; }
+    .slider { font-size: 11px; left: 12px; right: 12px; bottom: 12px; }
+    .slider input[type=range]::-webkit-slider-thumb { width: 22px; height: 22px; }
+    .tooltip { max-width: 200px; font-size: 13px; }
   }
-  .fallback-img {
-    display: none; width: 100%; height: auto;
-    background: #FFFFFF; padding: 12px;
-  }
-  .no-webgl .scene canvas { display: none; }
-  .no-webgl .controls { display: none; }
-  .no-webgl .fallback-img { display: block; }
 </style>
 </head>
 <body>
 
-<div class="scene">
+<div class="stage" id="stage">
   <canvas id="c"></canvas>
   <img class="fallback-img" src="assets/img/P054_schema.jpg" alt="Схема линии ДСК: от бункера до штабелей фракций">
-</div>
 
-<div class="controls">
-  <div class="slider-row">
+  <div class="slider">
     <span>Собрано</span>
     <input type="range" id="explode" min="0" max="100" value="0">
     <span>Разобрано</span>
   </div>
-  <div class="btn-row">
-    <button id="btn-assemble">Собрать</button>
-    <button id="btn-flow">Поток камня</button>
-    <button id="btn-rotate">Авто-вращение</button>
-    <button id="btn-reset">Сброс камеры</button>
+
+  <div class="tooltip" id="tooltip">
+    <button class="close" id="tooltip-close" aria-label="Закрыть">×</button>
+    <h4 id="tooltip-title"></h4>
+    <p id="tooltip-text"></p>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (function() {
-  // Проверка WebGL
+  // WebGL check
   var canvas = document.createElement('canvas');
   var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-  if (!gl || !window.THREE) {
-    document.body.classList.add('no-webgl');
-    return;
-  }
+  if (!gl || !window.THREE) { document.body.classList.add('no-webgl'); return; }
 
-  // Reduced motion
   var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Сцена
+  // Scene
   var scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1E1D1A);
 
-  var camera = new THREE.PerspectiveCamera(45, 21/9, 0.1, 1000);
-  camera.position.set(0, 8, 18);
+  var camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+  camera.position.set(0, 9, 20);
   camera.lookAt(0, 0, 0);
 
   var renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('c'), antialias: true });
-  renderer.setSize(window.innerWidth, window.innerHeight * 9/21);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-  // Свет
-  var ambient = new THREE.AmbientLight(0xffffff, 0.6);
-  scene.add(ambient);
-  var directional = new THREE.DirectionalLight(0xffffff, 0.8);
-  directional.position.set(5, 10, 7);
-  scene.add(directional);
+  // Lights
+  scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+  var dir = new THREE.DirectionalLight(0xffffff, 0.8);
+  dir.position.set(5, 10, 7);
+  scene.add(dir);
 
-  // Материалы
+  // Materials
   var matYellow = new THREE.MeshStandardMaterial({ color: 0xF2B705, roughness: 0.7 });
   var matDark = new THREE.MeshStandardMaterial({ color: 0x191919, roughness: 0.8 });
   var matGrey = new THREE.MeshStandardMaterial({ color: 0x55524B, roughness: 0.6 });
   var matStone = new THREE.MeshStandardMaterial({ color: 0xCFCABD, roughness: 0.9 });
 
-  // Узлы линии (позиции в собранном состоянии)
-  var nodes = [];
-  
-  // 1. Бункер приёмный
-  var hopper = new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 2), matDark);
-  hopper.position.set(-6, 0.75, 0);
-  scene.add(hopper);
-  nodes.push({ mesh: hopper, home: [-6, 0.75, 0], explode: [-8, 0.75, 0] });
+  // Nodes: mesh, home position, explode offset, label, description
+  var nodes = [
+    { mesh: new THREE.Mesh(new THREE.BoxGeometry(2, 1.5, 2), matDark),
+      home: [-6, 0.75, 0], explode: [-8, 0.75, 0],
+      title: 'Приёмный бункер', text: 'Принимает сырьё с карьера. Объём 8 м³.' },
+    { mesh: new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 1.5), matGrey),
+      home: [-4, 0.4, 0], explode: [-5, 0.4, 0],
+      title: 'Питатель', text: 'Дозирует сырьё на конвейер равномерно.' },
+    { mesh: new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), matYellow),
+      home: [-2, 1, 0], explode: [-2, 1, -3],
+      title: 'Щековая дробилка PE', text: 'Первичное дробление до 200 мм. Серия зависит от производительности.' },
+    { mesh: new THREE.Mesh(new THREE.BoxGeometry(3, 0.3, 0.8), matGrey),
+      home: [0.5, 0.5, 0], explode: [0.5, 0.5, 3],
+      title: 'Конвейер', text: 'Транспортирует материал между узлами. Ширина 650–800 мм.' },
+    { mesh: new THREE.Mesh(new THREE.CylinderGeometry(1, 1.2, 2.5, 16), matYellow),
+      home: [2.5, 1.25, 0], explode: [2.5, 1.25, -3],
+      title: 'Конусная дробилка DP', text: 'Вторичное дробление. Гидравлическая регулировка зазора.' },
+    { mesh: new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 1.5), matDark),
+      home: [5, 1, 0], explode: [5, 1, 3],
+      title: 'Грохот', text: 'Сортировка на фракции. 2–3 деки в зависимости от задачи.' },
+    { mesh: new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.2, 8), matStone),
+      home: [7, 0.6, -2], explode: [7, 0.6, -4],
+      title: 'Штабель 0–5 мм', text: 'Готовый продукт 0–5 мм — отгружается заказчику прямо со штабеля.' },
+    { mesh: new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.2, 8), matStone),
+      home: [8.5, 0.6, -2], explode: [8.5, 0.6, -4],
+      title: 'Штабель 5–20 мм', text: 'Основная фракция для дорожного строительства.' },
+    { mesh: new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.2, 8), matStone),
+      home: [10, 0.6, -2], explode: [10, 0.6, -4],
+      title: 'Штабель 20–40 мм', text: 'Крупная фракция для бетона и оснований.' }
+  ];
+  nodes.forEach(function(n) { scene.add(n.mesh); });
 
-  // 2. Питатель
-  var feeder = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.8, 1.5), matGrey);
-  feeder.position.set(-4, 0.4, 0);
-  scene.add(feeder);
-  nodes.push({ mesh: feeder, home: [-4, 0.4, 0], explode: [-5, 0.4, 0] });
-
-  // 3. Щековая дробилка
-  var jaw = new THREE.Mesh(new THREE.BoxGeometry(2, 2, 2), matYellow);
-  jaw.position.set(-2, 1, 0);
-  scene.add(jaw);
-  nodes.push({ mesh: jaw, home: [-2, 1, 0], explode: [-2, 1, -3] });
-
-  // 4. Конвейер 1
-  var conv1 = new THREE.Mesh(new THREE.BoxGeometry(3, 0.3, 0.8), matGrey);
-  conv1.position.set(0.5, 0.5, 0);
-  conv1.rotation.z = 0.1;
-  scene.add(conv1);
-  nodes.push({ mesh: conv1, home: [0.5, 0.5, 0], explode: [0.5, 0.5, 3] });
-
-  // 5. Конусная дробилка
-  var cone = new THREE.Mesh(new THREE.CylinderGeometry(1, 1.2, 2.5, 16), matYellow);
-  cone.position.set(2.5, 1.25, 0);
-  scene.add(cone);
-  nodes.push({ mesh: cone, home: [2.5, 1.25, 0], explode: [2.5, 1.25, -3] });
-
-  // 6. Грохот
-  var screen = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1, 1.5), matDark);
-  screen.position.set(5, 1, 0);
-  scene.add(screen);
-  nodes.push({ mesh: screen, home: [5, 1, 0], explode: [5, 1, 3] });
-
-  // 7. Конвейеры к штабелям
-  for (var i = 0; i < 3; i++) {
-    var conv = new THREE.Mesh(new THREE.BoxGeometry(2, 0.2, 0.6), matGrey);
-    conv.position.set(5 + i * 1.5, 0.5, -1.5);
-    conv.rotation.y = -0.3;
-    scene.add(conv);
-    nodes.push({ mesh: conv, home: [5 + i * 1.5, 0.5, -1.5], explode: [5 + i * 1.5, 0.5, -3] });
-  }
-
-  // 8. Штабеля фракций
-  for (var i = 0; i < 3; i++) {
-    var pile = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.2, 8), matStone);
-    pile.position.set(7 + i * 1.5, 0.6, -2);
-    scene.add(pile);
-    nodes.push({ mesh: pile, home: [7 + i * 1.5, 0.6, -2], explode: [7 + i * 1.5, 0.6, -4] });
-  }
-
-  // Поток камня (частицы)
-  var flowParticles = [];
-  var flowActive = false;
+  // Flow particles
   var flowMat = new THREE.MeshStandardMaterial({ color: 0xCFCABD, roughness: 0.9 });
-  
-  for (var i = 0; i < 20; i++) {
-    var stone = new THREE.Mesh(new THREE.SphereGeometry(0.15, 8, 8), flowMat);
-    stone.position.set(-6, 1, 0);
-    stone.visible = false;
-    scene.add(stone);
-    flowParticles.push({ mesh: stone, progress: 0 });
+  var particles = [];
+  for (var i = 0; i < 24; i++) {
+    var p = new THREE.Mesh(new THREE.SphereGeometry(0.12, 6, 6), flowMat);
+    p.visible = false;
+    scene.add(p);
+    particles.push({ mesh: p, t: Math.random() });
   }
 
-  // Управление
+  // State
   var explodeValue = 0;
-  var autoRotate = false;
-  var rotationAngle = 0;
+  var autoRotate = !reduce;
+  var rotAngle = 0;
+  var userRotX = 0, userRotY = 0;
+  var dragging = false, lastX = 0, lastY = 0;
 
+  // Slider
   document.getElementById('explode').addEventListener('input', function(e) {
     explodeValue = parseInt(e.target.value) / 100;
     updateNodes();
   });
 
-  document.getElementById('btn-assemble').addEventListener('click', function() {
-    explodeValue = 0;
-    document.getElementById('explode').value = 0;
-    updateNodes();
-  });
-
-  document.getElementById('btn-flow').addEventListener('click', function() {
-    flowActive = !flowActive;
-    this.classList.toggle('active', flowActive);
-  });
-
-  document.getElementById('btn-rotate').addEventListener('click', function() {
-    autoRotate = !autoRotate;
-    this.classList.toggle('active', autoRotate);
-  });
-
-  document.getElementById('btn-reset').addEventListener('click', function() {
-    camera.position.set(0, 8, 18);
-    camera.lookAt(0, 0, 0);
-    rotationAngle = 0;
-  });
-
   function updateNodes() {
-    nodes.forEach(function(node) {
-      node.mesh.position.x = node.home[0] + (node.explode[0] - node.home[0]) * explodeValue;
-      node.mesh.position.y = node.home[1] + (node.explode[1] - node.home[1]) * explodeValue;
-      node.mesh.position.z = node.home[2] + (node.explode[2] - node.home[2]) * explodeValue;
+    nodes.forEach(function(n) {
+      n.mesh.position.x = n.home[0] + (n.explode[0] - n.home[0]) * explodeValue;
+      n.mesh.position.y = n.home[1] + (n.explode[1] - n.home[1]) * explodeValue;
+      n.mesh.position.z = n.home[2] + (n.explode[2] - n.home[2]) * explodeValue;
     });
   }
 
-  // Пост-сообщения от родителя
-  window.addEventListener('message', function(e) {
-    if (e.data && e.data.type === 'sds-config') {
-      // Можно использовать для подсветки узлов
-      console.log('Config:', e.data);
+  // Tooltip
+  var tooltip = document.getElementById('tooltip');
+  var tooltipTitle = document.getElementById('tooltip-title');
+  var tooltipText = document.getElementById('tooltip-text');
+  document.getElementById('tooltip-close').addEventListener('click', function() {
+    tooltip.classList.remove('visible');
+  });
+  document.addEventListener('click', function(e) {
+    if (!tooltip.contains(e.target)) tooltip.classList.remove('visible');
+  });
+
+  // Raycaster for click
+  var raycaster = new THREE.Raycaster();
+  var mouse = new THREE.Vector2();
+  renderer.domElement.addEventListener('click', function(e) {
+    var rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    var hits = raycaster.intersectObjects(nodes.map(function(n) { return n.mesh; }));
+    if (hits.length > 0) {
+      var node = nodes.find(function(n) { return n.mesh === hits[0].object; });
+      if (node) {
+        tooltipTitle.textContent = node.title;
+        tooltipText.textContent = node.text;
+        var x = e.clientX - rect.left + 12;
+        var y = e.clientY - rect.top + 12;
+        tooltip.style.left = x + 'px';
+        tooltip.style.top = y + 'px';
+        tooltip.classList.add('visible');
+      }
     }
   });
 
-  // Анимация
+  // Mouse drag rotation
+  renderer.domElement.addEventListener('mousedown', function(e) {
+    dragging = true; lastX = e.clientX; lastY = e.clientY;
+    autoRotate = false;
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    userRotY += (e.clientX - lastX) * 0.005;
+    userRotX += (e.clientY - lastY) * 0.005;
+    userRotX = Math.max(-0.5, Math.min(0.5, userRotX));
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  window.addEventListener('mouseup', function() { dragging = false; });
+
+  // Touch drag
+  renderer.domElement.addEventListener('touchstart', function(e) {
+    dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+    autoRotate = false;
+  }, { passive: true });
+  renderer.domElement.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    userRotY += (e.touches[0].clientX - lastX) * 0.005;
+    userRotX += (e.touches[0].clientY - lastY) * 0.005;
+    userRotX = Math.max(-0.5, Math.min(0.5, userRotX));
+    lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  }, { passive: true });
+  renderer.domElement.addEventListener('touchend', function() { dragging = false; });
+
+  // Resize
+  function resize() {
+    var w = renderer.domElement.clientWidth;
+    var h = renderer.domElement.clientHeight;
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // Loop
   function animate() {
     requestAnimationFrame(animate);
 
     if (autoRotate && !reduce) {
-      rotationAngle += 0.005;
-      camera.position.x = Math.sin(rotationAngle) * 18;
-      camera.position.z = Math.cos(rotationAngle) * 18;
-      camera.lookAt(0, 0, 0);
+      rotAngle += 0.004;
     }
 
-    if (flowActive && !reduce) {
-      flowParticles.forEach(function(p) {
-        p.progress += 0.01;
-        if (p.progress > 1) p.progress = 0;
+    // Camera
+    var radius = 20;
+    camera.position.x = Math.sin(rotAngle + userRotY) * radius;
+    camera.position.z = Math.cos(rotAngle + userRotY) * radius;
+    camera.position.y = 9 + userRotX * 10;
+    camera.lookAt(0, 0, 0);
+
+    // Flow
+    if (!reduce) {
+      particles.forEach(function(p) {
+        p.t += 0.008;
+        if (p.t > 1) p.t = 0;
         p.mesh.visible = true;
-        // Простая траектория по линии
-        var t = p.progress;
-        p.mesh.position.x = -6 + t * 13;
-        p.mesh.position.y = 1 + Math.sin(t * Math.PI) * 0.5;
-        p.mesh.position.z = Math.sin(t * Math.PI * 2) * 0.3;
+        var t = p.t;
+        p.mesh.position.x = -6 + t * 16;
+        p.mesh.position.y = 1 + Math.sin(t * Math.PI) * 0.6;
+        p.mesh.position.z = Math.sin(t * Math.PI * 3) * 0.4;
       });
     } else {
-      flowParticles.forEach(function(p) {
-        p.mesh.visible = false;
-      });
+      particles.forEach(function(p) { p.mesh.visible = false; });
     }
 
     renderer.render(scene, camera);
   }
-
   animate();
-
-  // Ресайз
-  window.addEventListener('resize', function() {
-    var aspect = window.innerWidth / (window.innerHeight * 9/21);
-    camera.aspect = aspect;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight * 9/21);
-  });
 })();
 </script>
 </body>
