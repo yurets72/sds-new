@@ -298,3 +298,28 @@ figure { margin: 0; }
 @media (max-width: 900px) {
   #directions .dir-two { grid-template-columns: 1fr; }
 }
+/* ПРАВКИ РЕВЬЮ: анкоры под sticky-шапкой + слой движения */
+html { scroll-padding-top: 84px; }
+@media (max-width: 900px) { html { scroll-padding-top: 118px; } }
+@media (max-width: 600px) { html { scroll-padding-top: 158px; } }
+
+.js .reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .55s ease, transform .55s ease;
+}
+.js .reveal.in { opacity: 1; transform: translateY(0); }
+.hero-fig { overflow: hidden; }
+@keyframes hero-drift {
+  from { transform: scale(1.02); }
+  to   { transform: scale(1.09) translate3d(-1.5%, -1.2%, 0); }
+}
+.hero-fig .photo { animation: hero-drift 18s ease-in-out infinite alternate; }
+.btn { transition: background-color .15s ease; }
+.selector label { transition: background-color .15s ease; }
+.selector label:active { transform: translateY(1px); }
+.tel { transition: border-color .15s ease; }
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; transform: none; transition: none; }
+  .hero-fig .photo { animation: none; }
+  .btn, .selector label, .tel { transition: none; }
+}
