@@ -141,20 +141,28 @@
   <button class="btn" id="btnReset">Сброс камеры</button>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
 window.addEventListener('error', function (e) {
+  var t = e.target;
+  var where = (t && (t.src || t.href)) ? String(t.src || t.href).split('/').slice(-2).join('/') : '';
   var d = document.createElement('pre');
   d.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99;margin:0;background:#17181a;color:#f2c11b;padding:10px;font:12px/1.4 monospace;white-space:pre-wrap';
-  d.textContent = 'JS: ' + (e.message || e.type) + ' @ строка ' + e.lineno;
+  d.textContent = 'JS: ' + (e.message || e.type) + (where ? ' [' + where + ']' : '') + ' @ строка ' + (e.lineno || 0);
   document.body.appendChild(d);
 }, true);
-if (!window.THREE) {
-  document.body.insertAdjacentHTML('afterbegin',
-    '<pre style="position:fixed;top:0;left:0;right:0;z-index:99;margin:0;background:#17181a;color:#f2c11b;padding:10px;font:12px/1.4 monospace">THREE не загрузилась с CDN</pre>');
+</script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.183.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.183.0/examples/jsm/"
+  }
 }
-var OrbitControls = window.THREE ? THREE.OrbitControls : null;
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
 
 /* ---------- базовая сцена ---------- */
 const BG = 0xf4f2ec;
