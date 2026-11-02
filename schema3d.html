@@ -40,11 +40,13 @@
     position:fixed;left:0;right:0;bottom:0;padding:14px 24px;
     display:flex;align-items:center;gap:14px;flex-wrap:wrap;
     background:linear-gradient(transparent,rgba(244,242,236,.94) 45%);
+    justify-content: center; /* Центрируем ползунок */
   }
   .hud-bottom .slider-wrap{
     display:flex;align-items:center;gap:12px;flex:1;min-width:230px;max-width:480px;
     background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 16px;
     box-shadow:0 6px 24px rgba(23,24,26,.08);
+    margin: 0 auto; /* Дополнительное центрирование */
   }
   .hud-bottom .slider-wrap .cap{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);white-space:nowrap}
   input[type=range]{
@@ -59,15 +61,6 @@
   input[type=range]::-moz-range-thumb{
     width:14px;height:14px;border-radius:50%;background:var(--ink);border:4px solid var(--accent);cursor:grab;
   }
-  .btn{
-    font-family:'Golos Text',sans-serif;font-size:13px;font-weight:500;
-    border:1px solid var(--ink);background:var(--panel);color:var(--ink);
-    border-radius:10px;padding:10px 14px;cursor:pointer;
-    transition:background .15s,color .15s,border-color .15s;white-space:nowrap;
-  }
-  .btn:hover{background:var(--ink);color:#fff}
-  .btn.active{background:var(--accent);border-color:var(--accent)}
-  .btn.active:hover{background:#d9ad0f;border-color:#d9ad0f;color:var(--ink)}
 
   #tags{position:fixed;inset:0;pointer-events:none;overflow:hidden}
   .tag{
@@ -101,10 +94,9 @@
     .hud-top .badge{display:none}
     .hud-bottom{padding:10px 12px;gap:8px}
     .hud-bottom .slider-wrap{min-width:100%;order:-1}
-    .btn{padding:10px 8px;font-size:12px;flex:1 1 calc(50% - 8px)}
     .hint{display:none}
     .tag b{font-size:11px}.tag span{font-size:10px}
-    #info{left:12px;right:12px;max-width:none;bottom:150px}
+    #info{left:12px;right:12px;max-width:none;bottom:90px} /* Подняли выше, так как кнопок больше нет */
   }
 </style>
 </head>
@@ -137,7 +129,6 @@
   </div>
 </div>
 
-<!-- Локальные библиотеки: three + OrbitControls -->
 <script type="importmap">
 {
   "imports": {
@@ -448,7 +439,7 @@ const dummy = new THREE.Object3D();
 /* ---------- состояние ---------- */
 let explodeT = 1;
 let explodeTarget = 0;
-let flowOn = true;
+let flowOn = true; // Поток камня включен по умолчанию
 let flowAlpha = 0;
 let slider = document.getElementById('explode');
 let sliderHeld = false;
@@ -456,32 +447,6 @@ slider.addEventListener('pointerdown', () => sliderHeld = true);
 addEventListener('pointerup', () => sliderHeld = false);
 slider.addEventListener('input', () => { explodeTarget = slider.value / 100; });
 const setSliderFill = () => slider.style.setProperty('--fill', slider.value + '%');
-
-/* ---------- кнопки ---------- */
-const btnAssemble = document.getElementById('btnAssemble');
-const btnFlow = document.getElementById('btnFlow');
-const btnRotate = document.getElementById('btnRotate');
-const btnReset = document.getElementById('btnReset');
-
-btnAssemble.addEventListener('click', () => {
-  explodeTarget = explodeTarget > 0.5 ? 0 : 1;
-  btnAssemble.textContent = explodeTarget > 0.5 ? 'Собрать' : 'Разобрать';
-});
-btnFlow.addEventListener('click', () => {
-  flowOn = !flowOn;
-  btnFlow.classList.toggle('active', flowOn);
-});
-btnRotate.addEventListener('click', () => {
-  controls.autoRotate = !controls.autoRotate;
-  btnRotate.classList.toggle('active', controls.autoRotate);
-});
-btnReset.addEventListener('click', () => {
-  camera.position.copy(baseCameraPos());
-  controls.target.set(1.2, 2, 0);
-});
-renderer.domElement.addEventListener('pointerdown', () => {
-  if (controls.autoRotate) { controls.autoRotate = false; btnRotate.classList.remove('active'); }
-}, { once: false });
 
 /* ---------- инфо-панель ---------- */
 const info = document.getElementById('info');
@@ -608,6 +573,16 @@ function animate() {
   renderer.render(scene, camera);
 }
 animate();
+
+/* ---------- приём данных с основного сайта (postMessage) ---------- */
+/* Если на основном сайте выбрать другие параметры, схема может их принять */
+window.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'sds-config') {
+    // Здесь в будущем можно менять подписи, например:
+    // document.querySelector('.badge').textContent = `${event.data.tph} т/ч · ${event.data.rock} · фракция ${event.data.frac}`;
+    console.log('Получены настройки с сайта:', event.data);
+  }
+});
 </script>
 </body>
 </html>
