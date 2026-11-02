@@ -200,11 +200,25 @@ figcaption { font-size: var(--fs-small); color: var(--ink-2); margin-top: 12px; 
 .selector label:has(input:checked) { background: var(--ink); color: var(--ground); }
 .selector label:has(input:focus-visible) { outline: 3px solid var(--ink); outline-offset: 2px; }
 
-/* 3D-сцена: во всю ширину, пропорция вместо фиксированной высоты */
-.schema3d-fig { margin: 0 0 clamp(32px, 4vw, 56px); }
+/* 3D-сцена */
+.schema3d-fig { 
+  margin: 0 0 clamp(32px, 4vw, 56px); 
+}
 .schema3d {
-  display: block; width: 100%; aspect-ratio: 21 / 9;
-  border: 0; background: var(--field-dark);
+  display: block; 
+  width: 100%; 
+  aspect-ratio: 21 / 9; /* оставляем для десктопа */
+  border: 0; 
+  background: var(--field-dark);
+}
+
+/* Мобильная версия: растягиваем схему почти на весь экран */
+@media (max-width: 768px) {
+  .schema3d {
+    aspect-ratio: auto; /* отключаем жесткую пропорцию */
+    height: calc(100vh - 160px); /* 100vh минус высота шапки и отступов. Число 160 подберите под свой сайт */
+    min-height: 500px; /* чтобы на очень маленьких экранах не сплющивалось */
+  }
 }
 
 /* Результат подбора + таблица */
