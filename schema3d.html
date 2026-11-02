@@ -151,18 +151,10 @@ window.addEventListener('error', function (e) {
   document.body.appendChild(d);
 }, true);
 </script>
-<script type="importmap">
-{
-  "imports": {
-    "three": "./libs/three.module.js",
-    "three/addons/controls/OrbitControls.js": "./libs/OrbitControls.js"
-  }
-}
-</script>
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+<script type="module">
+import * as THREE from './libs/three.module.js';
+import { OrbitControls } from './libs/OrbitControls.js';
 
 /* ---------- базовая сцена ---------- */
 const BG = 0xf4f2ec;
