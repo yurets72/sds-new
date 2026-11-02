@@ -9,6 +9,13 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Golos+Text:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<style>
+  /* Небольшая правка: отступ для 3D-схемы, так как она теперь идет после кнопки */
+  .schema3d-fig { 
+    margin-top: clamp(32px, 4vw, 56px) !important; 
+    margin-bottom: 0 !important; 
+  }
+</style>
 </head>
 <body>
 
@@ -122,11 +129,8 @@
         <label><input type="radio" name="frac" value="40-70"> 40–70</label>
       </fieldset>
     </form>
-    <figure class="schema3d-fig">
-      <iframe class="schema3d" src="schema3d.html" loading="lazy"
-        title="Интерактивная 3D-схема линии ДСК: от приёмного бункера до грохота"></iframe>
-      <figcaption>Крутите схему, тяните ползунок — линия разбирается на узлы. Схема иллюстративная: точный состав считает инженер.</figcaption>
-    </figure>
+    
+    <!-- РЕЗУЛЬТАТ И КНОПКА ИДУТ ПЕРВЫМИ -->
     <div class="chain-in">
       <div class="chain" id="chain" aria-live="polite">
         <ol>
@@ -149,6 +153,14 @@
         </tbody>
       </table>
     </div>
+
+    <!-- 3D-СХЕМА КАК ВАУ-ЭФФЕКТ -->
+    <figure class="schema3d-fig">
+      <iframe class="schema3d" src="schema3d.html" loading="lazy"
+        title="Интерактивная 3D-схема линии ДСК: от приёмного бункера до грохота"></iframe>
+      <figcaption>Крутите схему, тяните ползунок — линия разбирается на узлы. Схема иллюстративная: точный состав считает инженер.</figcaption>
+    </figure>
+
   </div>
 </section>
 
