@@ -154,8 +154,8 @@ window.addEventListener('error', function (e) {
 <script type="importmap">
 {
   "imports": {
-    "three": "https://unpkg.com/three@0.183.0/build/three.module.js",
-    "three/addons/": "https://unpkg.com/three@0.183.0/examples/jsm/"
+    "three": "./libs/three.module.js",
+    "three/addons/controls/OrbitControls.js": "./libs/OrbitControls.js"
   }
 }
 </script>
@@ -262,4 +262,10 @@ function makeHopper() {
     const leg = box(0.14, 1.5, 0.14, M.dark); leg.position.set(x * 0.85, 0.75, z * 0.85); g.add(leg);
   }
   const body = cyl(1.7, 0.5, 1.9, M.steel, 4);
-  body.rotation.y = Math.PI / 4; body.position.y = 2.
+  body.rotation.y = Math.PI / 4; body.position.y = 2;
+  g.add(body);
+  return g;
+}
+</script>
+</body>
+</html>
